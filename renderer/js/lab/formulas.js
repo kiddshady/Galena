@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   MESADA — las fórmulas de los TPL 1 a 4 (Tecnología Farmacéutica II, UMAZA)
+   GALENA — las fórmulas de los TPL 1 a 4 (Tecnología Farmacéutica II, UMAZA)
    Cantidades, orden y usos: tal cual los prácticos de la cátedra. Lo que el
    práctico no dice no se inventa; cuando una explicación agrega algo de la
    teoría, sale de las unidades 1 a 3.

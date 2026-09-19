@@ -19,10 +19,10 @@ const os = require('os');
 
 const ROOT = path.join(__dirname, '..');
 // Datos en una carpeta temporal: el test no puede ensuciar el progreso real.
-process.env.MESADA_DATA = fs.mkdtempSync(path.join(os.tmpdir(), 'mesada-test-'));
-// Y su propio perfil de Chromium: si Mesada está abierta, compartir el userData
+process.env.GALENA_DATA = fs.mkdtempSync(path.join(os.tmpdir(), 'galena-test-'));
+// Y su propio perfil de Chromium: si Galena está abierta, compartir el userData
 // deja al test esperando el candado del perfil para siempre, sin error.
-app.setPath('userData', fs.mkdtempSync(path.join(os.tmpdir(), 'mesada-test-ud-')));
+app.setPath('userData', fs.mkdtempSync(path.join(os.tmpdir(), 'galena-test-ud-')));
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let pass = 0; let fail = 0;
@@ -46,8 +46,8 @@ const JUGADOR = String.raw`
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => [...document.querySelectorAll(s)];
   const titulo = $('.ox-viewhead__title').textContent;
-  const f = window.__mesadaPartida.f;
-  const factor = window.__mesadaPartida.factor;
+  const f = window.__galenaPartida.f;
+  const factor = window.__galenaPartida.factor;
   const log = [];
   const numES = (n) => String(Math.round(n * 1000) / 1000).replace('.', ',');
 
@@ -185,7 +185,7 @@ app.whenReady().then(async () => {
   ok('lista los errores en el resultado', r?.errores?.length >= 5, JSON.stringify(r?.errores));
 
   console.log('\nProgreso en disco');
-  const prog = JSON.parse(fs.readFileSync(path.join(process.env.MESADA_DATA, 'progreso.json'), 'utf8'));
+  const prog = JSON.parse(fs.readFileSync(path.join(process.env.GALENA_DATA, 'progreso.json'), 'utf8'));
   ok('se guardaron las 25', Object.keys(prog).length === 25, `${Object.keys(prog).length}`);
   ok('el récord de la calamina se mantiene en 100', prog['tp1-calamina']?.mejor === 100);
   const est = await js(`document.getElementById('stat-est').textContent`);
@@ -208,6 +208,6 @@ app.whenReady().then(async () => {
 
   ok('sin errores en la consola', errores.length === 0, errores.slice(0, 5).join(' | '));
   console.log(`\n═══ ${pass} ok · ${fail} fallas ═══`);
-  fs.rmSync(process.env.MESADA_DATA, { recursive: true, force: true });
+  fs.rmSync(process.env.GALENA_DATA, { recursive: true, force: true });
   app.exit(fail ? 1 : 0);
 });

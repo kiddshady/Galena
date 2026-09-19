@@ -1,8 +1,8 @@
 {
-  "name": "mesada",
-  "productName": "Mesada",
+  "name": "galena",
+  "productName": "Galena",
   "version": "0.1.0",
-  "description": "Mesada — simulador de laboratorio de Tecnología Farmacéutica II (TPL 1 a 4).",
+  "description": "Galena — simulador de laboratorio de Tecnología Farmacéutica II (TPL 1 a 4).",
   "main": "main.cjs",
   "author": "Fran",
   "license": "MIT",

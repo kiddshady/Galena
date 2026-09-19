@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   MESADA — el motor de una partida
+   GALENA — el motor de una partida
    Una partida es una fórmula de principio a fin, en siete etapas:
 
      receta → estantería → pesada → elaboración → envasado → control → resultado

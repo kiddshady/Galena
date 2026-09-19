@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   MESADA — la app
+   GALENA — la app
    Simulador de laboratorio para los TPL de Tecnología Farmacéutica II.
    Tres vistas: el recetario (las 25 fórmulas y tu progreso), la mesada (una
    partida en curso) y los ajustes. El motor del juego vive en lab/juego.js;
@@ -127,7 +127,7 @@ function viewMesada(id) {
     S.partida = nuevaPartida(f, { loteVariable: S.settings.loteVariable !== false });
   }
   const P = S.partida;
-  window.__mesadaPartida = P;   // lo lee test/partidas.test.cjs
+  window.__galenaPartida = P;   // lo lee test/partidas.test.cjs
   paint(head({
     title: P.f.nombre,
     sub: `TPL ${P.f.tp} · Formulación N° ${P.f.n} · ${P.f.ff}`,

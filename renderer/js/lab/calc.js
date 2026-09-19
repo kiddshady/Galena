@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   MESADA — cuentas puras del juego
+   GALENA — cuentas puras del juego
    Sin DOM: se importan desde el motor y desde los tests de Node.
    ═══════════════════════════════════════════════════════════════════════════ */
 

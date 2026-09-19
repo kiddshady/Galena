@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   MESADA — catálogo del laboratorio
+   GALENA — catálogo del laboratorio
    Todo lo que hay en la estantería, las funciones que puede cumplir un
    componente, los envases, las leyendas del rótulo y los controles de calidad.
    Las fórmulas (formulas.js) solo nombran ids de acá.

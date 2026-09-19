@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   MESADA — la escena del inspector
+   GALENA — la escena del inspector
    Dibujos SVG del material de laboratorio. Todo el trazo sale de currentColor
    (hereda el gris del tema) y solo el contenido lleva color propio: el color
    de lo que se está preparando es información, el vidrio no.

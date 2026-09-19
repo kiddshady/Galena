@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   MESADA — calculadora
+   GALENA — calculadora
    Una calculadora común y nada más: no lee ni escribe nada del juego. Vive en
    el pie del inspector de la mesada y conserva lo que tenía entre repintados y
    entre fórmulas (el estado es del módulo, no de la vista).

@@ -1,4 +1,4 @@
-# Mesada
+# Galena
 
 Simulador de laboratorio para los TPL 1 a 4 de Tecnología Farmacéutica y
 Biofarmacia II (UMAZA, 2026). Construida sobre [Onyx](C:\tools\Onyx).

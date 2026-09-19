@@ -31,7 +31,7 @@
 const fsp = require('fs/promises');
 const path = require('path');
 
-const ROOT = process.env.MESADA_DATA || path.join(__dirname, '..', 'data');
+const ROOT = process.env.GALENA_DATA || path.join(__dirname, '..', 'data');
 const SETTINGS_FILE = path.join(ROOT, 'settings.json');
 
 /* ── Ajustes de tu app ───────────────────────────────────────────────────────
