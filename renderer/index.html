@@ -1,0 +1,124 @@
+<meta charset="utf-8">
+<!-- CSP estricta: sin conexiones externas, sin eval. Si tu app necesita hablar
+     con una API, agregá su origen a connect-src y nada más. -->
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+<title>Mesada</title>
+
+<link rel="stylesheet" href="./css/fonts.css">
+<link rel="stylesheet" href="./css/tokens.css">
+<link rel="stylesheet" href="./css/base.css">
+<link rel="stylesheet" href="./css/motion.css">
+<link rel="stylesheet" href="./css/shell.css">
+<link rel="stylesheet" href="./css/controls.css">
+<link rel="stylesheet" href="./css/surfaces.css">
+<link rel="stylesheet" href="./css/overlays.css">
+<link rel="stylesheet" href="./css/mesada.css">
+
+<style>
+  /* Boot splash: réplica exacta del primer frame. Pinta ANTES de que cargue
+     ningún módulo, así no hay un solo instante sin identidad en pantalla.
+     El color tiene que ser el mismo backgroundColor de la BrowserWindow —
+     literal, no una variable: los tokens todavía podrían no haber cargado. */
+  #boot-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: grid;
+    place-items: center;
+    background: #090c0c;
+    transition: opacity .34s cubic-bezier(.16, 1, .3, 1);
+  }
+  #boot-splash svg { width: 46px; height: 46px; stroke: #f2f4f7; fill: none;
+                     stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
+  /* La marca se DIBUJA, no aparece: el canto primero, la mesa detrás. */
+  #boot-splash path { stroke-dasharray: 40; stroke-dashoffset: 40;
+                      animation: boot-draw .72s cubic-bezier(.16,1,.3,1) forwards; }
+  #boot-splash path:last-child { stroke-dasharray: 8; stroke-dashoffset: 8;
+                                 opacity: .34; animation-delay: .1s; }
+  @keyframes boot-draw { to { stroke-dashoffset: 0 } }
+</style>
+
+<div id="boot-splash">
+  <svg viewBox="0 0 16 16">
+    <path d="M6 2.3h4M6.8 2.3v4.3L3.2 12.7a.9.9 0 0 0 .8 1.3h8a.9.9 0 0 0 .8-1.3L9.2 6.6V2.3"/>
+    <path d="M4.7 10.4h6.6"/>
+  </svg>
+</div>
+
+<div class="ox-app">
+
+  <!-- ── Titlebar propia: acá no hay frame nativo ─────────────────────────── -->
+  <header class="ox-titlebar">
+    <div class="ox-brand ox-no-drag" data-tip="Mesada" id="brand">
+      <svg class="ox-brand__mark ox-icon" viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M6 2.3h4M6.8 2.3v4.3L3.2 12.7a.9.9 0 0 0 .8 1.3h8a.9.9 0 0 0 .8-1.3L9.2 6.6V2.3"/>
+        <path class="ox-brand__trail" d="M4.7 10.4h6.6"/>
+      </svg>
+      <span class="ox-brand__name">Mesada</span>
+    </div>
+
+    <button class="ox-iconbtn ox-iconbtn--sm ox-no-drag" id="btn-palette"
+            data-tip="Comandos" data-tip-key="Ctrl K"><i data-icon="search"></i></button>
+
+    <!-- Contexto de la vista actual. Lo llena el router. -->
+    <div class="ox-titlebar__context" id="titlebar-context"></div>
+
+    <div class="ox-wincontrols">
+      <button class="ox-wincontrol" id="win-min"   aria-label="Minimizar"><i data-icon="winMin"></i></button>
+      <button class="ox-wincontrol" id="win-max"   aria-label="Maximizar"><i data-icon="winMax"></i></button>
+      <button class="ox-wincontrol ox-wincontrol--close" id="win-close" aria-label="Cerrar"><i data-icon="winClose"></i></button>
+    </div>
+  </header>
+
+  <div class="ox-body">
+
+    <!-- ── Rail ──────────────────────────────────────────────────────────── -->
+    <nav class="ox-rail">
+      <div class="ox-rail__top">
+        <button class="ox-btn ox-btn--secondary ox-flashable" id="btn-azar-rail" style="width:100%">
+          <i data-icon="zap"></i> Una al azar
+        </button>
+      </div>
+
+      <div class="ox-rail__nav ox-scroll">
+        <div class="ox-rail__group">
+          <button class="ox-navitem" data-view="recetario">
+            <i data-icon="book"></i> Recetario
+          </button>
+          <button class="ox-navitem" data-view="mesada">
+            <i data-icon="matraz"></i> Mesada
+          </button>
+        </div>
+
+        <div class="ox-rail__group">
+          <div class="ox-rail__group-label">Sistema</div>
+          <button class="ox-navitem" data-view="ajustes">
+            <i data-icon="settings"></i> Ajustes
+          </button>
+        </div>
+      </div>
+
+      <div class="ox-rail__foot" id="rail-foot"><div class="ox-meta">Tecnología Farmacéutica II · TPL 1 a 4</div></div>
+    </nav>
+
+    <!-- ── Vista ─────────────────────────────────────────────────────────── -->
+    <main class="ox-main" id="view"></main>
+  </div>
+
+  <!-- ── Statusbar ───────────────────────────────────────────────────────── -->
+  <footer class="ox-statusbar">
+    <div class="ox-statusbar__item" data-tip="Fórmulas preparadas al menos una vez" data-tip-side="top">
+      <i data-icon="matraz"></i> <span class="ox-statusbar__value ox-num" id="stat-comp">0</span> preparadas
+    </div>
+    <div class="ox-statusbar__item" data-tip="Estrellas ganadas" data-tip-side="top">
+      <i data-icon="target"></i> <span class="ox-statusbar__value ox-num" id="stat-est">0</span> estrellas
+    </div>
+    <div class="ox-spacer"></div>
+  </footer>
+</div>
+
+<!-- Todos los overlays se portalean acá: fuera del flujo, por encima de todo. -->
+<div id="ox-layer"></div>
+
+<script type="module" src="./js/app.js"></script>
