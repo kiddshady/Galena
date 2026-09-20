@@ -10,21 +10,36 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
-    "test": "node test/tokens.test.mjs && node test/store.test.mjs && node test/format.test.mjs && node test/datos.test.mjs",
+    "test": "node test/tokens.test.mjs && node test/store.test.mjs && node test/format.test.mjs && node test/datos.test.mjs && node test/actualizador.test.mjs",
     "smoke": "electron test/renderer.test.cjs",
     "partidas": "electron test/partidas.test.cjs",
     "icons": "node tools/icons.mjs",
-    "build": "electron-builder --win portable --x64"
+    "build": "electron-builder --win --publish never",
+    "release": "electron-builder --win --publish always"
   },
   "devDependencies": {
     "electron": "40.10.2",
     "electron-builder": "^25.1.8"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
+  },
+  "homepage": "https://github.com/kiddshady/Galena",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kiddshady/Galena.git"
   },
   "build": {
     "appId": "com.umbrovex.galena",
     "productName": "Galena",
     "copyright": "Copyright © 2026 Kidd Shady · Umbrovex Systems",
     "directories": { "output": "dist" },
+    "publish": {
+      "provider": "github",
+      "owner": "kiddshady",
+      "repo": "Galena",
+      "releaseType": "release"
+    },
     "files": [
       "main.cjs",
       "preload.cjs",
@@ -41,11 +56,16 @@
       "!tools/**"
     ],
     "win": {
-      "target": "portable",
+      "target": ["nsis", "portable"],
       "icon": "build/icon.ico"
     },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
     "portable": {
-      "artifactName": "${productName}.${ext}"
+      "artifactName": "${productName}-Portable-${version}.${ext}"
     }
   }
 }

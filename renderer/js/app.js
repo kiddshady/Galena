@@ -12,6 +12,7 @@ import Palette from './palette.js';
 import Router from './router.js';
 import { initClickFlash, initScrollFades, raf2, countTo } from './motion.js';
 import { esc, paint, head, empty, attempt, colorToken } from './ui.js';
+import { fmtBytes } from './format.js';
 import { FORMULAS, TPS, formula } from './lab/formulas.js';
 import { nuevaPartida, montar, estrellas } from './lab/juego.js';
 import { montarCalculadora } from './lab/calculadora.js';
@@ -31,9 +32,10 @@ const S = {
 };
 
 async function loadAll() {
-  const [settings, progreso] = await Promise.all([api.settings.get(), api.doc.read('progreso', {})]);
+  const [settings, progreso, info] = await Promise.all([api.settings.get(), api.doc.read('progreso', {}), api.info().catch(() => null)]);
   S.settings = settings;
   S.progreso = progreso || {};
+  S.info = info;
 }
 
 async function guardarResultado(P) {
@@ -188,6 +190,11 @@ function viewAjustes() {
         <button class="ox-btn ox-btn--danger ox-flashable" id="btn-reset"><i data-icon="trash"></i> Borrar el progreso</button>
       </div>
       <div class="ox-section" style="max-width:640px;margin-top:28px">
+        <div class="ox-section__head"><span class="ox-section__title">Actualizaciones</span></div>
+        <p class="ox-meta" style="margin:0 0 12px">Galena busca sola al arrancar y avisa si hay una versión nueva. No descarga nada sin que digas que sí.</p>
+        <button class="ox-btn ox-btn--secondary ox-flashable" id="btn-update"><i data-icon="retry"></i> Buscar actualizaciones</button>
+      </div>
+      <div class="ox-section" style="max-width:640px;margin-top:28px">
         <div class="ox-section__head"><span class="ox-section__title">Cómo se puntúa</span></div>
         <p class="ox-meta" style="margin:0;line-height:1.6">Cada fórmula arranca en 100. Resta la función mal asignada (3), el frasco equivocado (2), el instrumento equivocado (2), la cantidad mal medida (4), el paso de elaboración equivocado (5), pasarse o quedarse corto de pH (6), la temperatura fuera de rango (4), el envase (4), cada leyenda (3) y cada control de calidad (3). Tres estrellas desde 90, dos desde 75, una desde 50.</p>
       </div>
@@ -199,6 +206,7 @@ function viewAjustes() {
     btn.classList.toggle('is-on', on);
     S.settings = await api.settings.save({ loteVariable: on });
   });
+  document.getElementById('btn-update').addEventListener('click', checkUpdates);
   document.getElementById('btn-reset').addEventListener('click', async () => {
     const ok = await Modal.confirm({
       title: 'Borrar el progreso',
@@ -211,6 +219,127 @@ function viewAjustes() {
     updateChrome();
     Toast.show({ title: 'Progreso borrado', icon: 'check' });
   });
+}
+
+/* ══ Actualizaciones ═════════════════════════════════════════════════════════
+   El proceso principal manda el estado entero en cada cambio (ver
+   src/actualizador.cjs). Acá se decide qué merece un cartel: una versión
+   nueva, un "estás al día" que vos pediste, un error. La búsqueda silenciosa
+   del arranque no molesta si no hay nada. */
+
+let upd = null;          // el último estado recibido
+let updToast = null;     // el toast persistente mientras descarga
+
+function onUpdateState(e) {
+  const prev = upd;
+  upd = e;
+  paintVersion();
+  switch (e.fase) {
+    case 'disponible':
+      if (prev?.fase !== 'disponible') offerUpdate(e);
+      break;
+    case 'descargando':
+      paintDownload(e);
+      break;
+    case 'listo':
+      updToast?.close(); updToast = null;
+      Toast.show({
+        title: `Galena ${e.version} lista`,
+        text: 'Se instala al reiniciar. Si no llegás, entra sola la próxima vez que cierres la app.',
+        icon: 'check', duration: 0,
+        action: { label: 'Reiniciar y actualizar', run: () => api.update.instalar() },
+      });
+      break;
+    case 'al-dia':
+      if (e.manual) Toast.show({ title: 'Estás al día', text: `Galena ${e.actual}`, icon: 'check' });
+      break;
+    case 'error':
+      updToast?.close(); updToast = null;
+      if (e.manual || prev?.fase === 'descargando') Toast.error('No se pudo actualizar', e.error);
+      break;
+  }
+}
+
+function paintVersion() {
+  const chip = document.getElementById('stat-version');
+  const val = chip?.querySelector('.ox-statusbar__value');
+  if (!chip || !val) return;
+  const v = upd?.actual || S.info?.version || '';
+  const pending = upd?.fase === 'disponible' || upd?.fase === 'listo';
+  val.textContent = upd?.fase === 'listo' ? `${upd.version} lista para instalar`
+    : upd?.fase === 'disponible' ? `${upd.version} disponible`
+    : upd?.fase === 'descargando' ? `bajando ${upd.version}…`
+    : `v${v}`;
+  chip.classList.toggle('is-pending', pending);
+  chip.dataset.tip = upd?.fase === 'listo' ? 'Reiniciar y actualizar'
+    : upd?.fase === 'disponible' ? 'Ver la versión nueva'
+    : 'Buscar actualizaciones';
+}
+
+function paintDownload(e) {
+  const pct = Math.round(e.progreso.pct * 100);
+  const text = e.progreso.total
+    ? `${pct} % · ${fmtBytes(e.progreso.transferido)} de ${fmtBytes(e.progreso.total)}`
+    : `${fmtBytes(e.progreso.transferido)}…`;
+  if (!updToast) updToast = Toast.show({ title: `Descargando Galena ${e.version}`, text: ' ', icon: 'download', duration: 0 });
+  const t = updToast.el?.querySelector('.ox-toast__text');
+  if (t) t.textContent = text;
+}
+
+function offerUpdate(e) {
+  Toast.show({
+    title: 'Hay una versión nueva',
+    text: e.nombre,
+    icon: 'zap', duration: 12000,
+    action: { label: 'Ver', run: () => updateModal() },
+  });
+}
+
+async function updateModal() {
+  const e = upd;
+  if (!e || e.fase !== 'disponible') return;
+  const body = document.createElement('div');
+  body.className = 'ox-col';
+  body.style.gap = '14px';
+  body.innerHTML = `
+    <p class="ox-meta" style="margin:0;line-height:1.65">
+      Tenés la <span class="ox-mono">${esc(e.actual)}</span>. La <span class="ox-mono">${esc(e.version)}</span>
+      pesa ${esc(fmtBytes(e.bytes))}: se descarga solo si decís que sí, y se instala al reiniciar
+      (o al cerrar Galena, si no llegás a reiniciar).
+    </p>
+    <div><a class="ox-btn ox-btn--ghost ox-btn--sm" href="${esc(e.url)}" target="_blank" rel="noreferrer"><i data-icon="external"></i> Ver las notas de la versión</a></div>`;
+  Icons.mount(body);
+  const ok = await Modal.show({
+    title: e.nombre || `Galena ${e.version}`,
+    body,
+    width: 460,
+    actions: [
+      { label: 'Después', value: null },
+      { label: 'Descargar', value: true, variant: 'primary', autofocus: true },
+    ],
+  });
+  if (ok) attempt(() => api.update.descargar(), { errorTitle: 'No se pudo descargar' });
+}
+
+/** Lo que hace el clic en la versión de la statusbar, según el momento. */
+function versionClick() {
+  if (upd?.fase === 'listo') return api.update.instalar();
+  if (upd?.fase === 'disponible') return updateModal();
+  return checkUpdates();
+}
+
+async function checkUpdates() {
+  const st = await attempt(() => api.update.buscar({ manual: true }), { errorTitle: 'No se pudo buscar' });
+  // Los demás desenlaces (al día, disponible, error) llegan por onUpdateState.
+  if (st?.fase === 'sin-soporte') Toast.show({ title: 'Acá no se actualiza sola', text: st.motivo, icon: 'info', duration: 8000 });
+}
+
+function wireUpdates() {
+  api.update?.onCambio(onUpdateState);
+  api.update?.estado().then(onUpdateState).catch(() => paintVersion());
+  const chip = document.getElementById('stat-version');
+  chip?.addEventListener('click', versionClick);
+  chip?.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); versionClick(); } });
 }
 
 /* ══ Router ══════════════════════════════════════════════════════════════════ */
@@ -263,6 +392,7 @@ function registerCommands() {
     { id: 'nav-rec', group: 'Ir a', icon: 'book', label: 'Recetario', run: () => Router.go('recetario') },
     { id: 'nav-mesa', group: 'Ir a', icon: 'matraz', label: 'Mesada', run: () => Router.go('mesada') },
     { id: 'nav-aj', group: 'Ir a', icon: 'settings', label: 'Ajustes', run: () => Router.go('ajustes') },
+    { id: 'update', group: 'Sistema', icon: 'retry', label: 'Buscar actualizaciones', run: checkUpdates },
     ...FORMULAS.map((f) => ({
       id: `f-${f.id}`, group: `TPL ${f.tp}`, icon: 'matraz', label: f.nombre, hint: `N° ${f.n}`,
       run: () => empezar(f.id),
@@ -295,6 +425,7 @@ async function boot() {
   }
 
   registerCommands();
+  wireUpdates();
   updateChrome();
   Router.onChange(updateChrome);
   Router.go('recetario');

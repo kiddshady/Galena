@@ -14,6 +14,7 @@
 
 const { ipcMain, app } = require('electron');
 const store = require('./store.cjs');
+const actualizador = require('./actualizador.cjs');
 
 /* Las colecciones que el renderer puede tocar. Es una lista blanca a
    propósito: sin ella, cualquier bug en el renderer puede crear carpetas
@@ -44,6 +45,14 @@ function register() {
     dataDir: store.ROOT,
     electron: process.versions.electron,
   }));
+
+  /* ── Actualizaciones: el renderer pide, el main contesta con el estado
+     entero; los cambios espontáneos (progreso, error) llegan por
+     'update:cambio' (ver actualizador.cjs). ── */
+  handle('update:estado', () => actualizador.leer());
+  handle('update:buscar', (opts) => actualizador.buscar(opts));
+  handle('update:descargar', () => actualizador.descargar());
+  handle('update:instalar', () => actualizador.instalar());
 
   handle('settings:get', () => store.loadSettings());
   handle('settings:save', (patch) => store.saveSettings(patch));

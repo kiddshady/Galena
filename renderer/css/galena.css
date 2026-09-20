@@ -222,6 +222,12 @@
 .ms-rpmini__q { color: var(--ox-text); white-space: nowrap; }
 .ms-rpmini__row.is-taken .ms-rpmini__q { color: var(--ox-text-3); }
 
+/* ── La versión en la statusbar ──────────────────────────────────────────────
+   Es un botón discreto: buscar actualizaciones, o abrir la que ya está. */
+.ms-version { cursor: pointer; transition: color var(--ox-t-1) var(--ox-ease-soft); }
+.ms-version:hover { color: var(--ox-text); }
+.ms-version.is-pending .ox-statusbar__value { color: var(--ox-text); }
+
 /* ── Recetario ───────────────────────────────────────────────────────────── */
 .ms-tp { margin-bottom: 26px; }
 .ms-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
