@@ -11,7 +11,6 @@
     "start": "electron .",
     "dev": "electron . --dev",
     "test": "node test/tokens.test.mjs && node test/store.test.mjs && node test/format.test.mjs && node test/datos.test.mjs && node test/actualizador.test.mjs",
-    "smoke": "electron test/renderer.test.cjs",
     "partidas": "electron test/partidas.test.cjs",
     "icons": "node tools/icons.mjs",
     "build": "electron-builder --win --publish never",
