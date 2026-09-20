@@ -23,4 +23,21 @@ npm test           # tokens, almacenamiento y datos de las fórmulas
 npm run partidas   # juega las 25 fórmulas por la UI real: tienen que dar 100
 ```
 
-El progreso se guarda en `data/progreso.json`.
+El progreso se guarda en `data/progreso.json` corriendo desde el repo, y en
+`%APPDATA%\Galena\data` en la app instalada.
+
+## Instalar y actualizar
+
+Los releases están en [GitHub](https://github.com/kiddshady/Galena/releases):
+**Setup** se instala y se actualiza solo (busca al arrancar, avisa si hay
+versión nueva y no descarga nada sin permiso); **Portable** es un exe suelto
+que no se actualiza.
+
+```
+npm run icons      # hornea build/icon.ico desde el código
+npm run build      # Setup + Portable en dist/, sin publicar
+npm run release    # compila y publica el release (antes: $env:GH_TOKEN = gh auth token)
+```
+
+Para publicar: bump de `version` en package.json en un commit
+`chore(release): vX.Y.Z`, y después `npm run release`.
