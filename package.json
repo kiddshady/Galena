@@ -1,7 +1,7 @@
 {
   "name": "galena",
   "productName": "Galena",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Galena — simulador de laboratorio de Tecnología Farmacéutica II (TPL 1 a 4).",
   "main": "main.cjs",
   "author": "Kidd Shady · Umbrovex Systems <umbrovex@proton.me>",
@@ -33,7 +33,9 @@
     "appId": "com.umbrovex.galena",
     "productName": "Galena",
     "copyright": "Copyright © 2026 Kidd Shady · Umbrovex Systems",
-    "directories": { "output": "dist" },
+    "directories": {
+      "output": "dist"
+    },
     "publish": {
       "provider": "github",
       "owner": "kiddshady",
@@ -56,7 +58,10 @@
       "!tools/**"
     ],
     "win": {
-      "target": ["nsis", "portable"],
+      "target": [
+        "nsis",
+        "portable"
+      ],
       "icon": "build/icon.ico"
     },
     "nsis": {
