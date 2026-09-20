@@ -44,7 +44,7 @@
 /* ── Receta ──────────────────────────────────────────────────────────────── */
 .ms-rp {
   background: var(--ox-s2); --ox-surface: var(--ox-s2);
-  border-radius: var(--ox-r-lg); box-shadow: var(--ox-e1), var(--ox-hairline);
+  border-radius: var(--ox-r-lg); box-shadow: var(--ox-hairline);
   padding: 20px 22px; display: flex; flex-direction: column; gap: 12px;
 }
 .ms-rp__head { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
@@ -227,7 +227,7 @@
 .ms-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
 .ms-fcard {
   display: flex; flex-direction: column; gap: 6px; text-align: left;
-  padding: 14px 16px; border-radius: var(--ox-r-lg); background: var(--ox-s2); box-shadow: var(--ox-e1), var(--ox-hairline);
+  padding: 14px 16px; border-radius: var(--ox-r-lg); background: var(--ox-s2); box-shadow: var(--ox-hairline);
   transition: background-color var(--ox-t-1) var(--ox-ease-soft), transform var(--ox-t-2) var(--ox-ease);
 }
 .ms-fcard:hover { background: var(--ox-s3); transform: translateY(-1px); }
