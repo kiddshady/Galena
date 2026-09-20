@@ -106,6 +106,9 @@ function createWindow(state) {
     minHeight: MIN_H,
     frame: false,
     show: false,
+    // Empaquetada el ícono sale del exe; desde el repo, sin esto, la barra de
+    // tareas muestra el de Electron.
+    icon: path.join(__dirname, 'build', 'icon.ico'),
     paintWhenInitiallyHidden: true,
     backgroundColor: BG,
     webPreferences: {

@@ -6,9 +6,9 @@
    legibles que se pueden abrir con un editor, versionar en git y arreglar a
    mano cuando algo sale mal.
 
-   Viven en el directorio del proyecto (`data/`), no en AppData: así se ven, no
-   dependen de dónde quedó instalada la app, y no te los virtualiza nadie.
-   `ONYX_DATA` lo puede mover.
+   Corriendo desde el repo viven en el directorio del proyecto (`data/`), así se
+   ven y se versionan; empaquetada, en %APPDATA%\Galena\data (ver raizPorDefecto).
+   `GALENA_DATA` lo puede mover.
 
    ── Por qué este archivo es más largo de lo que parece que debería ──────────
    Escribir JSON "bien" tiene tres trampas que solo aparecen con uso real, y
@@ -31,7 +31,20 @@
 const fsp = require('fs/promises');
 const path = require('path');
 
-const ROOT = process.env.GALENA_DATA || path.join(__dirname, '..', 'data');
+/* Empaquetada, `__dirname` cae dentro de app.asar (solo lectura) y cada guardado
+   fallaría EN SILENCIO: ahí los datos van a %APPDATA%\Galena\data. El require de
+   electron va dentro de un try porque los tests cargan este módulo con node
+   pelado, donde `require('electron')` devuelve una ruta y `app` queda undefined.
+   `GALENA_DATA` mueve todo. */
+function raizPorDefecto() {
+  try {
+    const { app } = require('electron');
+    if (app && app.isPackaged) return path.join(app.getPath('userData'), 'data');
+  } catch { /* node pelado (tests): sin electron, usamos la del proyecto */ }
+  return path.join(__dirname, '..', 'data');
+}
+
+const ROOT = process.env.GALENA_DATA || raizPorDefecto();
 const SETTINGS_FILE = path.join(ROOT, 'settings.json');
 
 /* ── Ajustes de tu app ───────────────────────────────────────────────────────

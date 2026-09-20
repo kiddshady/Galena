@@ -10,3 +10,6 @@ data/
 
 # Permisos locales de Claude Code
 .claude/settings.local.json
+
+# Hojas de control del ícono y capturas
+.shots/
