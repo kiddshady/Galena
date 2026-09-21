@@ -69,8 +69,9 @@ console.log('\n4. Una búsqueda, un solo desenlace');
 /* Se porta como el real en lo que importa: emite antes de resolver, y cuando
    falla emite 'error' Y rechaza con el mismo error. */
 class UpdaterFalso extends EventEmitter {
-  constructor() { super(); this.hay = null; this.falla = null; }
+  constructor() { super(); this.hay = null; this.falla = null; this.consultas = 0; }
   async checkForUpdates() {
+    this.consultas++;
     this.emit('checking-for-update');
     if (this.falla) { this.emit('error', this.falla); throw this.falla; }
     if (this.hay) this.emit('update-available', this.hay); else this.emit('update-not-available', {});
@@ -125,6 +126,18 @@ enviados.length = 0;
 falso.falla = new Error('ESOCKETTIMEDOUT');
 await upd.descargar();
 ok('la descarga fallida: descargando → error, una sola vez', fases() === 'descargando → error', fases());
+
+console.log('\n5. La automática pendiente no repite una búsqueda manual');
+const carrera = new UpdaterFalso();
+carrera.hay = { version: '9.9.9', releaseName: 'Galena 9.9.9', files: [{ size: 1234 }] };
+enviados.length = 0;
+upd.iniciar(() => ventana, { empaquetada: true, portable: false, updater: carrera });
+await upd.buscar({ manual: true });
+ok('la manual consulta una vez', carrera.consultas === 1, String(carrera.consultas));
+ok('la manual llega a disponible', fases() === 'buscando → disponible', fases());
+await upd.buscar({ manual: false });
+ok('el timer automático no vuelve a consultar', carrera.consultas === 1, String(carrera.consultas));
+ok('y queda un solo desenlace disponible', enviados.filter((e) => e.fase === 'disponible').length === 1, fases());
 
 console.log(`\n═══ ${pass} ok · ${fail} fallas ═══\n`);
 process.exit(fail ? 1 : 0);

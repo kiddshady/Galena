@@ -76,6 +76,7 @@ const VACIO = {
 
 let estado = { ...VACIO };
 let dameVentana = null;
+let busquedaIniciada = false;
 
 function fijar(parche) {
   estado = { ...estado, ...parche };
@@ -107,6 +108,7 @@ function iniciar(getWin, {
 } = {}) {
   dameVentana = getWin;
   estado = { ...VACIO, actual: electronApp?.getVersion() || '' };
+  busquedaIniciada = false;
 
   const s = soporte({ empaquetada, portable });
   if (!s.ok) { fijar({ fase: 'sin-soporte', motivo: s.motivo }); return; }
@@ -164,6 +166,13 @@ async function buscar({ manual = false } = {}) {
   if (!autoUpdater || estado.fase === 'sin-soporte') return estado;
   // Una búsqueda ya en curso, o una descarga andando, no se pisan.
   if (estado.fase === 'buscando' || estado.fase === 'descargando') return estado;
+
+  /* El arranque agenda una búsqueda automática a los seis segundos. Si el
+     usuario se adelantó y ya buscó manualmente, ese timer no debe repetir la
+     consulta ni volver a ofrecer la misma versión. Las búsquedas manuales sí
+     quedan habilitadas para que el usuario pueda reintentar cuando quiera. */
+  if (!manual && busquedaIniciada) return estado;
+  busquedaIniciada = true;
 
   /* `manual` se anota sin avisar. Avisarlo acá mandaba el desenlace de la
      búsqueda ANTERIOR con el `manual` nuevo puesto —un "al día" viejo, un error
