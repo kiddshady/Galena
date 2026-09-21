@@ -8,7 +8,6 @@
 
 import { Icons } from './icons.js';
 import { Tooltip, Toast, Modal } from './overlays.js';
-import Palette from './palette.js';
 import Router from './router.js';
 import { initClickFlash, initScrollFades, raf2, countTo } from './motion.js';
 import { esc, paint, head, empty, attempt, colorToken } from './ui.js';
@@ -365,7 +364,6 @@ function wireShell() {
 
   document.querySelectorAll('.ox-navitem').forEach((b) =>
     b.addEventListener('click', () => Router.go(b.dataset.view)));
-  document.getElementById('btn-palette')?.addEventListener('click', () => Palette.toggle());
   document.getElementById('btn-azar-rail')?.addEventListener('click', alAzar);
 
   // Delegación global solo para la navegación declarativa (data-goto): el resto
@@ -385,21 +383,6 @@ function updateChrome() {
     ? `${Icons.svg('matraz', 'ox-icon--sm')}<span>${esc(S.partida.f.nombre)}</span>` : '';
 }
 
-function registerCommands() {
-  Palette.clear();
-  Palette.register([
-    { id: 'azar', group: 'Jugar', icon: 'zap', label: 'Una fórmula al azar', run: alAzar },
-    { id: 'nav-rec', group: 'Ir a', icon: 'book', label: 'Recetario', run: () => Router.go('recetario') },
-    { id: 'nav-mesa', group: 'Ir a', icon: 'matraz', label: 'Mesada', run: () => Router.go('mesada') },
-    { id: 'nav-aj', group: 'Ir a', icon: 'settings', label: 'Ajustes', run: () => Router.go('ajustes') },
-    { id: 'update', group: 'Sistema', icon: 'retry', label: 'Buscar actualizaciones', run: checkUpdates },
-    ...FORMULAS.map((f) => ({
-      id: `f-${f.id}`, group: `TPL ${f.tp}`, icon: 'matraz', label: f.nombre, hint: `N° ${f.n}`,
-      run: () => empezar(f.id),
-    })),
-  ]);
-}
-
 function syncWindowColor() {
   const hex = colorToken('--ox-bg');
   if (hex) api?.win?.setBackground(hex);
@@ -410,7 +393,6 @@ function syncWindowColor() {
 async function boot() {
   Icons.mount(document);
   Tooltip.init();
-  Palette.init({ placeholder: 'Buscar una fórmula o un comando' });
   initClickFlash();
   initScrollFades();
   wireShell();
@@ -424,7 +406,6 @@ async function boot() {
     return;
   }
 
-  registerCommands();
   wireUpdates();
   updateChrome();
   Router.onChange(updateChrome);

@@ -163,6 +163,15 @@ app.whenReady().then(async () => {
   await sleep(1800);
   const js = (c) => win.webContents.executeJavaScript(c);
 
+  console.log('\nCommand palette retirada');
+  ok('no queda acceso visible', !await js(`document.getElementById('btn-palette')`));
+  const abrePalette = await js(`(async () => {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    return !!document.querySelector('.ox-palette, .ox-palette__anim');
+  })()`);
+  ok('Ctrl+K no crea la paleta', !abrePalette);
+
   const ids = await js(`import('./js/lab/formulas.js').then((m) => m.FORMULAS.map((f) => f.id))`);
   console.log(`\nJugando ${ids.length} fórmulas perfectas`);
   for (const id of ids) {
